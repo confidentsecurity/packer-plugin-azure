@@ -138,6 +138,7 @@ type Properties struct {
 	TypeHandlerVersion           *string                                       `json:"typeHandlerVersion,omitempty"`
 	AutoUpgradeMinorVersion      *bool                                         `json:"autoUpgradeMinorVersion,omitempty"`
 	Settings                     interface{}                                   `json:"settings,omitempty"`
+	ProtectedSettings            interface{}                                   `json:"protectedSettings,omitempty"`
 	Attributes                   *Attributes                                   `json:"attributes,omitempty"`
 	CreationData                 *DiskCreationData                             `json:"creationData,omitempty"`
 	DiskSizeGB                   *int32                                        `json:"diskSizeGB,omitempty"`

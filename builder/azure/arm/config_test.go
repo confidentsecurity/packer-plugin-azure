@@ -3762,13 +3762,13 @@ func TestConfigShouldAcceptValidOSDiskPerformanceTier(t *testing.T) {
 		config := map[string]interface{}{
 			"custom_managed_image_name":                "testimage",
 			"custom_managed_image_resource_group_name": "testrg",
-			"location":                                 "ignore",
-			"subscription_id":                          "ignore",
-			"communicator":                             "none",
-			"os_type":                                  constants.Target_Linux,
-			"os_disk_performance_tier":                 tier,
-			"managed_image_name":                       "ignore",
-			"managed_image_resource_group_name":        "ignore",
+			"location":                          "ignore",
+			"subscription_id":                   "ignore",
+			"communicator":                      "none",
+			"os_type":                           constants.Target_Linux,
+			"os_disk_performance_tier":          tier,
+			"managed_image_name":                "ignore",
+			"managed_image_resource_group_name": "ignore",
 		}
 
 		var c Config

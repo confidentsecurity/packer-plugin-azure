@@ -190,9 +190,12 @@
       "name": "[concat(parameters('vmName'), '/VMAccessForLinux')]",
       "properties": {
         "autoUpgradeMinorVersion": true,
+        "protectedSettings": {
+          "ssh_key": "--test-ssh-authorized-key--"
+        },
         "publisher": "Microsoft.OSTCExtensions",
         "settings": {
-          "ssh_key": "--test-ssh-authorized-key--",
+          "reset_ssh": true,
           "username": "[parameters('adminUsername')]"
         },
         "type": "VMAccessForLinux",

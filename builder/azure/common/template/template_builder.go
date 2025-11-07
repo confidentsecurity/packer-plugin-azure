@@ -387,15 +387,15 @@ func (s *TemplateBuilder) SetOSDiskPerformanceTier(performanceTier string) error
 	osProfile := vmResource.Properties.OsProfile
 	var sshPublicKey string
 	var adminUsername string
-	
+
 	if osProfile != nil {
 		if osProfile.AdminUsername != nil {
 			adminUsername = *osProfile.AdminUsername
 		}
-		if osProfile.LinuxConfiguration != nil && 
-		   osProfile.LinuxConfiguration.Ssh != nil && 
-		   osProfile.LinuxConfiguration.Ssh.PublicKeys != nil &&
-		   len(*osProfile.LinuxConfiguration.Ssh.PublicKeys) > 0 {
+		if osProfile.LinuxConfiguration != nil &&
+			osProfile.LinuxConfiguration.Ssh != nil &&
+			osProfile.LinuxConfiguration.Ssh.PublicKeys != nil &&
+			len(*osProfile.LinuxConfiguration.Ssh.PublicKeys) > 0 {
 			keys := *osProfile.LinuxConfiguration.Ssh.PublicKeys
 			if keys[0].KeyData != nil {
 				sshPublicKey = *keys[0].KeyData
@@ -419,8 +419,11 @@ func (s *TemplateBuilder) SetOSDiskPerformanceTier(performanceTier string) error
 				TypeHandlerVersion:      common.StringPtr("1.5"),
 				AutoUpgradeMinorVersion: common.BoolPtr(true),
 				Settings: map[string]interface{}{
-					"username": adminUsername,
-					"ssh_key":  sshPublicKey,
+					"username":  adminUsername,
+					"reset_ssh": true,
+				},
+				ProtectedSettings: map[string]interface{}{
+					"ssh_key": sshPublicKey,
 				},
 			},
 			DependsOn: &[]string{
