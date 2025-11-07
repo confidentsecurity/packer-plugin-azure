@@ -342,7 +342,6 @@ func (s *TemplateBuilder) SetOSDiskPerformanceTier(performanceTier string) error
 	}
 
 	if profile.ImageReference.Id != nil {
-		creationData.ImageReference = &hashiVMSDK.ImageReference{Id: profile.ImageReference.Id}
 		creationData.GalleryImageReference = &hashiVMSDK.ImageReference{Id: profile.ImageReference.Id}
 	} else if profile.ImageReference.SharedGalleryImageId != nil {
 		creationData.ImageReference = &hashiVMSDK.ImageReference{SharedGalleryImageId: profile.ImageReference.SharedGalleryImageId}
