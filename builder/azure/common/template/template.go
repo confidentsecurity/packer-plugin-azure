@@ -102,6 +102,12 @@ type BillingProfile struct {
 	MaxPrice float32 `json:"maxPrice,omitempty"`
 }
 
+type DiskCreationData struct {
+	CreateOption          *string                    `json:"createOption,omitempty"`
+	ImageReference        *hashiVMSDK.ImageReference `json:"imageReference,omitempty"`
+	GalleryImageReference *hashiVMSDK.ImageReference `json:"galleryImageReference,omitempty"`
+}
+
 // Template > Resource > Properties
 type Properties struct {
 	AccessPolicies               *[]AccessPolicies                             `json:"accessPolicies,omitempty"`
@@ -128,13 +134,15 @@ type Properties struct {
 	Priority                     *string                                       `json:"priority,omitempty"`
 	EvictionPolicy               *hashiVMSDK.VirtualMachineEvictionPolicyTypes `json:"evictionPolicy,omitempty"`
 	BillingProfile               *BillingProfile                               `json:"billingProfile,omitempty"`
-	//CustomScript extension related properties
-	Publisher               *string               `json:"publisher,omitempty"`
-	Type                    *string               `json:"type,omitempty"`
-	TypeHandlerVersion      *string               `json:"typeHandlerVersion,omitempty"`
-	AutoUpgradeMinorVersion *bool                 `json:"autoUpgradeMinorVersion,omitempty"`
-	Settings                *CustomScriptSettings `json:"settings,omitempty"`
-	Attributes              *Attributes           `json:"attributes,omitempty"`
+	Publisher                    *string                                       `json:"publisher,omitempty"`
+	Type                         *string                                       `json:"type,omitempty"`
+	TypeHandlerVersion           *string                                       `json:"typeHandlerVersion,omitempty"`
+	AutoUpgradeMinorVersion      *bool                                         `json:"autoUpgradeMinorVersion,omitempty"`
+	Settings                     *CustomScriptSettings                         `json:"settings,omitempty"`
+	Attributes                   *Attributes                                   `json:"attributes,omitempty"`
+	CreationData                 *DiskCreationData                             `json:"creationData,omitempty"`
+	DiskSizeGB                   *int32                                        `json:"diskSizeGB,omitempty"`
+	Tier                         *string                                       `json:"tier,omitempty"`
 }
 
 type CustomScriptSettings struct {

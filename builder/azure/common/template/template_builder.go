@@ -326,16 +326,64 @@ func (s *TemplateBuilder) SetOSDiskSizeGB(diskSizeGB int32) error {
 }
 
 func (s *TemplateBuilder) SetOSDiskPerformanceTier(performanceTier string) error {
-	resource, err := s.getResourceByType(resourceVirtualMachine)
+	vmResource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
 	}
 
-	profile := resource.Properties.StorageProfile
+	profile := vmResource.Properties.StorageProfile
+
+	if profile.ImageReference == nil {
+		return fmt.Errorf("SetOSDiskPerformanceTier requires an image reference to be set first")
+	}
+
+	creationData := &DiskCreationData{
+		CreateOption: common.StringPtr("FromImage"),
+	}
+
+	if profile.ImageReference.Id != nil {
+		creationData.ImageReference = &hashiVMSDK.ImageReference{Id: profile.ImageReference.Id}
+		creationData.GalleryImageReference = &hashiVMSDK.ImageReference{Id: profile.ImageReference.Id}
+	} else if profile.ImageReference.SharedGalleryImageId != nil {
+		creationData.ImageReference = &hashiVMSDK.ImageReference{SharedGalleryImageId: profile.ImageReference.SharedGalleryImageId}
+	} else if profile.ImageReference.CommunityGalleryImageId != nil {
+		creationData.ImageReference = &hashiVMSDK.ImageReference{CommunityGalleryImageId: profile.ImageReference.CommunityGalleryImageId}
+	}
+
+	diskProperties := &Properties{
+		CreationData: creationData,
+		Tier:         common.StringPtr(performanceTier),
+	}
+
+	if profile.OsDisk.DiskSizeGB != nil {
+		diskProperties.DiskSizeGB = profile.OsDisk.DiskSizeGB
+	}
+
+	diskResource := &Resource{
+		ApiVersion: common.StringPtr("[variables('computeApiVersion')]"),
+		Name:       common.StringPtr("[parameters('osDiskName')]"),
+		Type:       common.StringPtr("Microsoft.Compute/disks"),
+		Location:   common.StringPtr("[variables('location')]"),
+		Sku: &Sku{
+			Name: common.StringPtr("Premium_LRS"),
+			Tier: common.StringPtr("Premium"),
+		},
+		Properties: diskProperties,
+	}
+
+	if err := s.addResource(diskResource); err != nil {
+		return err
+	}
+
+	profile.ImageReference = nil
+	profile.OsDisk.CreateOption = hashiVMSDK.DiskCreateOptionTypesAttach
 	if profile.OsDisk.ManagedDisk == nil {
 		profile.OsDisk.ManagedDisk = &ManagedDisk{}
 	}
-	profile.OsDisk.ManagedDisk.Tier = common.StringPtr(performanceTier)
+	profile.OsDisk.ManagedDisk.ID = common.StringPtr("[resourceId('Microsoft.Compute/disks', parameters('osDiskName'))]")
+
+	diskDependency := "[concat('Microsoft.Compute/disks/', parameters('osDiskName'))]"
+	s.addResourceDependency(vmResource, diskDependency)
 
 	return nil
 }

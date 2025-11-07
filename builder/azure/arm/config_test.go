@@ -3728,14 +3728,14 @@ func TestConfigShouldntParseInvalidSigIDs(t *testing.T) {
 
 func TestConfigShouldRejectInvalidOSDiskPerformanceTier(t *testing.T) {
 	config := map[string]interface{}{
-		"image_offer":               "ignore",
-		"image_publisher":           "ignore",
-		"image_sku":                 "ignore",
-		"location":                  "ignore",
-		"subscription_id":           "ignore",
-		"communicator":              "none",
-		"os_type":                   constants.Target_Linux,
-		"os_disk_performance_tier":  "P99",
+		"image_offer":              "ignore",
+		"image_publisher":          "ignore",
+		"image_sku":                "ignore",
+		"location":                 "ignore",
+		"subscription_id":          "ignore",
+		"communicator":             "none",
+		"os_type":                  constants.Target_Linux,
+		"os_disk_performance_tier": "P99",
 	}
 
 	var c Config
@@ -3760,16 +3760,15 @@ func TestConfigShouldAcceptValidOSDiskPerformanceTier(t *testing.T) {
 
 	for _, tier := range validTiers {
 		config := map[string]interface{}{
-			"image_offer":                        "ignore",
-			"image_publisher":                    "ignore",
-			"image_sku":                          "ignore",
-			"location":                           "ignore",
-			"subscription_id":                    "ignore",
-			"communicator":                       "none",
-			"os_type":                            constants.Target_Linux,
-			"os_disk_performance_tier":           tier,
-			"managed_image_name":                 "ignore",
-			"managed_image_resource_group_name":  "ignore",
+			"custom_managed_image_name":                "testimage",
+			"custom_managed_image_resource_group_name": "testrg",
+			"location":                                 "ignore",
+			"subscription_id":                          "ignore",
+			"communicator":                             "none",
+			"os_type":                                  constants.Target_Linux,
+			"os_disk_performance_tier":                 tier,
+			"managed_image_name":                       "ignore",
+			"managed_image_resource_group_name":        "ignore",
 		}
 
 		var c Config

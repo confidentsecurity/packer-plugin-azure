@@ -478,7 +478,8 @@ func TestSetOSDiskPerformanceTier(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = testSubject.SetMarketPlaceImage("Canonical", "UbuntuServer", "16.04", "latest", compute.CachingTypesReadWrite); err != nil {
+	imageID := "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Compute/galleries/testgallery/images/testimage/versions/1.0.0"
+	if err = testSubject.SetSharedGalleryImage("westcentralus", imageID, compute.CachingTypesReadWrite); err != nil {
 		t.Fatal(err)
 	}
 

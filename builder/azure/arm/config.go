@@ -1366,6 +1366,14 @@ func assertRequiredParametersSet(c *Config, errs *packersdk.MultiError) {
 		if ok, err := assertAllowedOSDiskPerformanceTier(c.OSDiskPerformanceTier); !ok {
 			errs = packersdk.MultiErrorAppend(errs, err)
 		}
+
+		if c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != "" {
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("os_disk_performance_tier is only supported with Shared Image Gallery or Managed Image sources, not with marketplace images (image_publisher/image_offer/image_sku)"))
+		}
+
+		if c.DiskEncryptionSetId != "" {
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("os_disk_performance_tier is not yet supported with disk_encryption_set_id"))
+		}
 	}
 
 	validImageVersion := regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+$`)
