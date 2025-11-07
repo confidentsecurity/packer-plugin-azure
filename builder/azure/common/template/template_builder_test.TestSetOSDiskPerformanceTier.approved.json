@@ -191,13 +191,10 @@
       "properties": {
         "autoUpgradeMinorVersion": true,
         "protectedSettings": {
-          "ssh_key": "--test-ssh-authorized-key--"
-        },
-        "publisher": "Microsoft.OSTCExtensions",
-        "settings": {
-          "reset_ssh": true,
+          "ssh_key": "--test-ssh-authorized-key--",
           "username": "[parameters('adminUsername')]"
         },
+        "publisher": "Microsoft.OSTCExtensions",
         "type": "VMAccessForLinux",
         "typeHandlerVersion": "1.5"
       },

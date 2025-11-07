@@ -418,12 +418,9 @@ func (s *TemplateBuilder) SetOSDiskPerformanceTier(performanceTier string) error
 				Type:                    common.StringPtr("VMAccessForLinux"),
 				TypeHandlerVersion:      common.StringPtr("1.5"),
 				AutoUpgradeMinorVersion: common.BoolPtr(true),
-				Settings: map[string]interface{}{
-					"username":  adminUsername,
-					"reset_ssh": true,
-				},
 				ProtectedSettings: map[string]interface{}{
-					"ssh_key": sshPublicKey,
+					"username": adminUsername,
+					"ssh_key":  sshPublicKey,
 				},
 			},
 			DependsOn: &[]string{
