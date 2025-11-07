@@ -180,6 +180,25 @@
         "tier": "Premium"
       },
       "type": "Microsoft.Compute/disks"
+    },
+    {
+      "apiVersion": "[variables('computeApiVersion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+      ],
+      "location": "[variables('location')]",
+      "name": "[concat(parameters('vmName'), '/VMAccessForLinux')]",
+      "properties": {
+        "autoUpgradeMinorVersion": true,
+        "publisher": "Microsoft.OSTCExtensions",
+        "settings": {
+          "ssh_key": "--test-ssh-authorized-key--",
+          "username": "[parameters('adminUsername')]"
+        },
+        "type": "VMAccessForLinux",
+        "typeHandlerVersion": "1.5"
+      },
+      "type": "Microsoft.Compute/virtualMachines/extensions"
     }
   ],
   "variables": {
