@@ -4,7 +4,6 @@
 package template
 
 import (
-	"strings"
 	"testing"
 
 	approvaltests "github.com/approvals/go-approval-tests"
@@ -492,11 +491,5 @@ func TestSetOSDiskPerformanceTier(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	jsonStr := *doc
-	if !strings.Contains(jsonStr, `"tier"`) {
-		t.Errorf("Expected template to contain 'tier' property, but it was not found")
-	}
-	if !strings.Contains(jsonStr, `"P30"`) {
-		t.Errorf("Expected template to contain 'P30' value, but it was not found")
-	}
+	approvaltests.VerifyJSONBytes(t, []byte(*doc))
 }
