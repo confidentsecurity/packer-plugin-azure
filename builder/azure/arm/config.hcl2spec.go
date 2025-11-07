@@ -241,6 +241,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_expiration_time":                   &hcldec.AttrSpec{Name: "winrm_expiration_time", Type: cty.String, Required: false},
 		"temp_os_disk_name":                       &hcldec.AttrSpec{Name: "temp_os_disk_name", Type: cty.String, Required: false},
 		"os_disk_size_gb":                         &hcldec.AttrSpec{Name: "os_disk_size_gb", Type: cty.Number, Required: false},
+		"os_disk_performance_tier":                &hcldec.AttrSpec{Name: "os_disk_performance_tier", Type: cty.String, Required: false},
 		"disk_additional_size":                    &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.Number), Required: false},
 		"disk_caching_type":                       &hcldec.AttrSpec{Name: "disk_caching_type", Type: cty.String, Required: false},
 		"allowed_inbound_ip_addresses":            &hcldec.AttrSpec{Name: "allowed_inbound_ip_addresses", Type: cty.List(cty.String), Required: false},

@@ -576,7 +576,10 @@ type Config struct {
 	// (gigabytes). Values of zero or less than zero are ignored.
 	OSDiskSizeGB int32 `mapstructure:"os_disk_size_gb" required:"false"`
 	// Specify the performance tier of the OS disk. This allows you to set a higher performance tier
-	// for more information on performance tiers.
+	// than the default tier derived from the disk size, which can improve performance for disk-intensive
+	// operations during the build process. Valid values are P1, P2, P3, P4, P6, P10, P15, P20, P30, P40,
+	// P50, P60, P70, P80. See https://learn.microsoft.com/en-us/azure/virtual-machines/disks-performance-tiers
+	// for more information.
 	OSDiskPerformanceTier string `mapstructure:"os_disk_performance_tier" required:"false"`
 	// The size(s) of any additional hard disks for the VM in gigabytes. If
 	// this is not specified then the VM will only contain an OS disk. The
