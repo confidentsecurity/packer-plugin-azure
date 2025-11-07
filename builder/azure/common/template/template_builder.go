@@ -359,7 +359,7 @@ func (s *TemplateBuilder) SetOSDiskPerformanceTier(performanceTier string) error
 	}
 
 	diskResource := &Resource{
-		ApiVersion: common.StringPtr("[variables('computeApiVersion')]"),
+		ApiVersion: common.StringPtr("[variables('diskApiVersion')]"),
 		Name:       common.StringPtr("[parameters('osDiskName')]"),
 		Type:       common.StringPtr("Microsoft.Compute/disks"),
 		Location:   common.StringPtr("[variables('location')]"),
@@ -899,6 +899,7 @@ const BasicTemplate = `{
   "variables": {
     "addressPrefix": "10.0.0.0/16",
     "computeApiVersion": "2023-03-01",
+    "diskApiVersion": "2023-04-02",
     "location": "[resourceGroup().location]",
     "networkApiVersion": "2023-04-01",
     "publicIPAddressType": "Dynamic",
