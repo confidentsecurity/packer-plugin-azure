@@ -1359,6 +1359,12 @@ func assertRequiredParametersSet(c *Config, errs *packersdk.MultiError) {
 		}
 	}
 
+	if c.OSDiskPerformanceTier != "" {
+		if ok, err := assertAllowedOSDiskPerformanceTier(c.OSDiskPerformanceTier); !ok {
+			errs = packersdk.MultiErrorAppend(errs, err)
+		}
+	}
+
 	validImageVersion := regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+$`)
 	if c.SharedGalleryDestination.SigDestinationGalleryName != "" {
 		if c.SharedGalleryDestination.SigDestinationResourceGroup == "" {
@@ -1712,6 +1718,16 @@ func assertMatchingCVMEncryptionTypes(securityEncryptionType, sigDestinationConf
 	default:
 		return false, fmt.Errorf("Fatal error, security_encryption_type %q does not match any of the expected values", securityEncryptionType)
 	}
+}
+
+func assertAllowedOSDiskPerformanceTier(performanceTier string) (bool, error) {
+	validTiers := []string{"P1", "P2", "P3", "P4", "P6", "P10", "P15", "P20", "P30", "P40", "P50", "P60", "P70", "P80"}
+	for _, tier := range validTiers {
+		if performanceTier == tier {
+			return true, nil
+		}
+	}
+	return false, fmt.Errorf("The %s %q must be one of: %s.", "os_disk_performance_tier", performanceTier, strings.Join(validTiers, ", "))
 }
 
 func isValidAzureName(re *regexp.Regexp, rgn string) bool {
