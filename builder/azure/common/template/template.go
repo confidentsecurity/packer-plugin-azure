@@ -56,6 +56,7 @@ type ManagedDisk struct {
 	StorageAccountType hashiVMSDK.StorageAccountTypes    `json:"storageAccountType,omitempty"`
 	DiskEncryptionSet  *DiskEncryptionSetParameters      `json:"diskEncryptionSet,omitempty"`
 	SecurityProfile    *hashiVMSDK.VMDiskSecurityProfile `json:"securityProfile,omitempty"`
+	Tier               *string                           `json:"tier,omitempty"`
 	// ID - Resource Id
 	ID *string `json:"id,omitempty"`
 }

@@ -88,6 +88,7 @@ type FlatConfig struct {
 	WinrmExpirationTime                        *string                            `mapstructure:"winrm_expiration_time" required:"false" cty:"winrm_expiration_time" hcl:"winrm_expiration_time"`
 	TempOSDiskName                             *string                            `mapstructure:"temp_os_disk_name" required:"false" cty:"temp_os_disk_name" hcl:"temp_os_disk_name"`
 	OSDiskSizeGB                               *int32                             `mapstructure:"os_disk_size_gb" required:"false" cty:"os_disk_size_gb" hcl:"os_disk_size_gb"`
+	OSDiskPerformanceTier                      *string                            `mapstructure:"os_disk_performance_tier" required:"false" cty:"os_disk_performance_tier" hcl:"os_disk_performance_tier"`
 	AdditionalDiskSize                         []int32                            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size" hcl:"disk_additional_size"`
 	DiskCachingType                            *string                            `mapstructure:"disk_caching_type" required:"false" cty:"disk_caching_type" hcl:"disk_caching_type"`
 	AllowedInboundIpAddresses                  []string                           `mapstructure:"allowed_inbound_ip_addresses" cty:"allowed_inbound_ip_addresses" hcl:"allowed_inbound_ip_addresses"`

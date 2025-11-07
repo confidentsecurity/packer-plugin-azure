@@ -575,6 +575,9 @@ type Config struct {
 	// Specify the size of the OS disk in GB
 	// (gigabytes). Values of zero or less than zero are ignored.
 	OSDiskSizeGB int32 `mapstructure:"os_disk_size_gb" required:"false"`
+	// Specify the performance tier of the OS disk. This allows you to set a higher performance tier
+	// for more information on performance tiers.
+	OSDiskPerformanceTier string `mapstructure:"os_disk_performance_tier" required:"false"`
 	// The size(s) of any additional hard disks for the VM in gigabytes. If
 	// this is not specified then the VM will only contain an OS disk. The
 	// number of additional disks and maximum size of a disk depends on the

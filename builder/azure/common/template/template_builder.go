@@ -325,6 +325,21 @@ func (s *TemplateBuilder) SetOSDiskSizeGB(diskSizeGB int32) error {
 	return nil
 }
 
+func (s *TemplateBuilder) SetOSDiskPerformanceTier(performanceTier string) error {
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	profile := resource.Properties.StorageProfile
+	if profile.OsDisk.ManagedDisk == nil {
+		profile.OsDisk.ManagedDisk = &ManagedDisk{}
+	}
+	profile.OsDisk.ManagedDisk.Tier = common.StringPtr(performanceTier)
+
+	return nil
+}
+
 func (s *TemplateBuilder) SetDiskEncryptionSetID(diskEncryptionSetID string, securityType *hashiVMSDK.SecurityTypes, securityEncryptionType *hashiVMSDK.SecurityEncryptionTypes) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
