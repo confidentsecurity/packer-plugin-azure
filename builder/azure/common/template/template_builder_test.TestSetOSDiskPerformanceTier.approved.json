@@ -129,21 +129,6 @@
             }
           ]
         },
-        "osProfile": {
-          "adminUsername": "[parameters('adminUsername')]",
-          "computerName": "[parameters('vmName')]",
-          "linuxConfiguration": {
-            "disablePasswordAuthentication": true,
-            "ssh": {
-              "publicKeys": [
-                {
-                  "keyData": "--test-ssh-authorized-key--",
-                  "path": "[variables('sshKeyPath')]"
-                }
-              ]
-            }
-          }
-        },
         "storageProfile": {
           "osDisk": {
             "caching": "ReadWrite",

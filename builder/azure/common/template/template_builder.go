@@ -384,6 +384,10 @@ func (s *TemplateBuilder) SetOSDiskPerformanceTier(performanceTier string) error
 	diskDependency := "[concat('Microsoft.Compute/disks/', parameters('osDiskName'))]"
 	s.addResourceDependency(vmResource, diskDependency)
 
+	if err := s.ClearOsProfile(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
