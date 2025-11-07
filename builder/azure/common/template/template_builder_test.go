@@ -4,6 +4,7 @@
 package template
 
 import (
+	"strings"
 	"testing"
 
 	approvaltests "github.com/approvals/go-approval-tests"
@@ -465,4 +466,37 @@ func TestLicenseType01(t *testing.T) {
 	}
 
 	approvaltests.VerifyJSONBytes(t, []byte(*doc))
+}
+
+// Test SetOSDiskPerformanceTier sets the tier in the template
+func TestSetOSDiskPerformanceTier(t *testing.T) {
+	testSubject, err := NewTemplateBuilder(BasicTemplate)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err = testSubject.BuildLinux("--test-ssh-authorized-key--", true); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = testSubject.SetMarketPlaceImage("Canonical", "UbuntuServer", "16.04", "latest", compute.CachingTypesReadWrite); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = testSubject.SetOSDiskPerformanceTier("P30"); err != nil {
+		t.Fatal(err)
+	}
+
+	doc, err := testSubject.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	jsonStr := *doc
+	if !strings.Contains(jsonStr, `"tier"`) {
+		t.Errorf("Expected template to contain 'tier' property, but it was not found")
+	}
+	if !strings.Contains(jsonStr, `"P30"`) {
+		t.Errorf("Expected template to contain 'P30' value, but it was not found")
+	}
 }
