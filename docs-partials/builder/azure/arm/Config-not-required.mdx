@@ -349,6 +349,12 @@
 - `os_disk_size_gb` (int32) - Specify the size of the OS disk in GB
   (gigabytes). Values of zero or less than zero are ignored.
 
+- `os_disk_performance_tier` (string) - Specify the performance tier of the OS disk. This allows you to set a higher performance tier
+  than the default tier derived from the disk size, which can improve performance for disk-intensive
+  operations during the build process. Valid values are P1, P2, P3, P4, P6, P10, P15, P20, P30, P40,
+  P50, P60, P70, P80. See https://learn.microsoft.com/en-us/azure/virtual-machines/disks-performance-tiers
+  for more information.
+
 - `disk_additional_size` ([]int32) - The size(s) of any additional hard disks for the VM in gigabytes. If
   this is not specified then the VM will only contain an OS disk. The
   number of additional disks and maximum size of a disk depends on the

@@ -575,6 +575,12 @@ type Config struct {
 	// Specify the size of the OS disk in GB
 	// (gigabytes). Values of zero or less than zero are ignored.
 	OSDiskSizeGB int32 `mapstructure:"os_disk_size_gb" required:"false"`
+	// Specify the performance tier of the OS disk. This allows you to set a higher performance tier
+	// than the default tier derived from the disk size, which can improve performance for disk-intensive
+	// operations during the build process. Valid values are P1, P2, P3, P4, P6, P10, P15, P20, P30, P40,
+	// P50, P60, P70, P80. See https://learn.microsoft.com/en-us/azure/virtual-machines/disks-performance-tiers
+	// for more information.
+	OSDiskPerformanceTier string `mapstructure:"os_disk_performance_tier" required:"false"`
 	// The size(s) of any additional hard disks for the VM in gigabytes. If
 	// this is not specified then the VM will only contain an OS disk. The
 	// number of additional disks and maximum size of a disk depends on the
@@ -1356,6 +1362,20 @@ func assertRequiredParametersSet(c *Config, errs *packersdk.MultiError) {
 		}
 	}
 
+	if c.OSDiskPerformanceTier != "" {
+		if ok, err := assertAllowedOSDiskPerformanceTier(c.OSDiskPerformanceTier); !ok {
+			errs = packersdk.MultiErrorAppend(errs, err)
+		}
+
+		if c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != "" {
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("os_disk_performance_tier is only supported with Shared Image Gallery or Managed Image sources, not with marketplace images (image_publisher/image_offer/image_sku)"))
+		}
+
+		if c.DiskEncryptionSetId != "" {
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("os_disk_performance_tier is not yet supported with disk_encryption_set_id"))
+		}
+	}
+
 	validImageVersion := regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+$`)
 	if c.SharedGalleryDestination.SigDestinationGalleryName != "" {
 		if c.SharedGalleryDestination.SigDestinationResourceGroup == "" {
@@ -1709,6 +1729,16 @@ func assertMatchingCVMEncryptionTypes(securityEncryptionType, sigDestinationConf
 	default:
 		return false, fmt.Errorf("Fatal error, security_encryption_type %q does not match any of the expected values", securityEncryptionType)
 	}
+}
+
+func assertAllowedOSDiskPerformanceTier(performanceTier string) (bool, error) {
+	validTiers := []string{"P1", "P2", "P3", "P4", "P6", "P10", "P15", "P20", "P30", "P40", "P50", "P60", "P70", "P80"}
+	for _, tier := range validTiers {
+		if performanceTier == tier {
+			return true, nil
+		}
+	}
+	return false, fmt.Errorf("The %s %q must be one of: %s.", "os_disk_performance_tier", performanceTier, strings.Join(validTiers, ", "))
 }
 
 func isValidAzureName(re *regexp.Regexp, rgn string) bool {

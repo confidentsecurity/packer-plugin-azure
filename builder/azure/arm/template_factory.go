@@ -258,6 +258,13 @@ func GetVirtualMachineTemplateBuilder(config *Config) (*template.TemplateBuilder
 		}
 	}
 
+	if config.OSDiskPerformanceTier != "" {
+		err = builder.SetOSDiskPerformanceTier(config.OSDiskPerformanceTier)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	if config.DiskEncryptionSetId != "" {
 		err = builder.SetDiskEncryptionSetID(config.DiskEncryptionSetId, securityProfile.securityType, securityProfile.securityEncryptionType)
 		if err != nil {

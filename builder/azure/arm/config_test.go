@@ -3725,3 +3725,56 @@ func TestConfigShouldntParseInvalidSigIDs(t *testing.T) {
 		t.Fatalf("getSharedImageGalleryObjectFromId unexpectedly parsed invalid ID")
 	}
 }
+
+func TestConfigShouldRejectInvalidOSDiskPerformanceTier(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":              "ignore",
+		"image_publisher":          "ignore",
+		"image_sku":                "ignore",
+		"location":                 "ignore",
+		"subscription_id":          "ignore",
+		"communicator":             "none",
+		"os_type":                  constants.Target_Linux,
+		"os_disk_performance_tier": "P99",
+	}
+
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
+	if err == nil {
+		t.Errorf("Expected configuration creation to fail with invalid os_disk_performance_tier, but it succeeded")
+	}
+
+	expectedErrorSubstring := "os_disk_performance_tier"
+	if !strings.Contains(err.Error(), expectedErrorSubstring) {
+		t.Errorf("Expected error message to contain '%s', but got: %s", expectedErrorSubstring, err.Error())
+	}
+
+	expectedErrorSubstring2 := "P99"
+	if !strings.Contains(err.Error(), expectedErrorSubstring2) {
+		t.Errorf("Expected error message to contain '%s', but got: %s", expectedErrorSubstring2, err.Error())
+	}
+}
+
+func TestConfigShouldAcceptValidOSDiskPerformanceTier(t *testing.T) {
+	validTiers := []string{"P1", "P2", "P3", "P4", "P6", "P10", "P15", "P20", "P30", "P40", "P50", "P60", "P70", "P80"}
+
+	for _, tier := range validTiers {
+		config := map[string]interface{}{
+			"custom_managed_image_name":                "testimage",
+			"custom_managed_image_resource_group_name": "testrg",
+			"location":                          "ignore",
+			"subscription_id":                   "ignore",
+			"communicator":                      "none",
+			"os_type":                           constants.Target_Linux,
+			"os_disk_performance_tier":          tier,
+			"managed_image_name":                "ignore",
+			"managed_image_resource_group_name": "ignore",
+		}
+
+		var c Config
+		_, err := c.Prepare(config, getPackerConfiguration())
+		if err != nil {
+			t.Errorf("Expected configuration to accept valid os_disk_performance_tier '%s', but got error: %s", tier, err)
+		}
+	}
+}

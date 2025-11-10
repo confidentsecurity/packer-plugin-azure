@@ -325,6 +325,115 @@ func (s *TemplateBuilder) SetOSDiskSizeGB(diskSizeGB int32) error {
 	return nil
 }
 
+func (s *TemplateBuilder) SetOSDiskPerformanceTier(performanceTier string) error {
+	vmResource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	profile := vmResource.Properties.StorageProfile
+
+	if profile.ImageReference == nil {
+		return fmt.Errorf("SetOSDiskPerformanceTier requires an image reference to be set first")
+	}
+
+	creationData := &DiskCreationData{
+		CreateOption: common.StringPtr("FromImage"),
+	}
+
+	if profile.ImageReference.Id != nil {
+		creationData.GalleryImageReference = &hashiVMSDK.ImageReference{Id: profile.ImageReference.Id}
+	} else if profile.ImageReference.SharedGalleryImageId != nil {
+		creationData.ImageReference = &hashiVMSDK.ImageReference{SharedGalleryImageId: profile.ImageReference.SharedGalleryImageId}
+	} else if profile.ImageReference.CommunityGalleryImageId != nil {
+		creationData.ImageReference = &hashiVMSDK.ImageReference{CommunityGalleryImageId: profile.ImageReference.CommunityGalleryImageId}
+	}
+
+	diskProperties := &Properties{
+		CreationData: creationData,
+		Tier:         common.StringPtr(performanceTier),
+	}
+
+	if profile.OsDisk.DiskSizeGB != nil {
+		diskProperties.DiskSizeGB = profile.OsDisk.DiskSizeGB
+	}
+
+	diskResource := &Resource{
+		ApiVersion: common.StringPtr("[variables('diskApiVersion')]"),
+		Name:       common.StringPtr("[parameters('osDiskName')]"),
+		Type:       common.StringPtr("Microsoft.Compute/disks"),
+		Location:   common.StringPtr("[variables('location')]"),
+		Sku: &Sku{
+			Name: common.StringPtr("Premium_LRS"),
+			Tier: common.StringPtr("Premium"),
+		},
+		Properties: diskProperties,
+	}
+
+	if err := s.addResource(diskResource); err != nil {
+		return err
+	}
+
+	profile.ImageReference = nil
+	profile.OsDisk.CreateOption = hashiVMSDK.DiskCreateOptionTypesAttach
+	if profile.OsDisk.ManagedDisk == nil {
+		profile.OsDisk.ManagedDisk = &ManagedDisk{}
+	}
+	profile.OsDisk.ManagedDisk.ID = common.StringPtr("[resourceId('Microsoft.Compute/disks', parameters('osDiskName'))]")
+
+	diskDependency := "[concat('Microsoft.Compute/disks/', parameters('osDiskName'))]"
+	s.addResourceDependency(vmResource, diskDependency)
+
+	osProfile := vmResource.Properties.OsProfile
+	var sshPublicKey string
+	var adminUsername string
+
+	if osProfile != nil {
+		if osProfile.AdminUsername != nil {
+			adminUsername = *osProfile.AdminUsername
+		}
+		if osProfile.LinuxConfiguration != nil &&
+			osProfile.LinuxConfiguration.Ssh != nil &&
+			osProfile.LinuxConfiguration.Ssh.PublicKeys != nil &&
+			len(*osProfile.LinuxConfiguration.Ssh.PublicKeys) > 0 {
+			keys := *osProfile.LinuxConfiguration.Ssh.PublicKeys
+			if keys[0].KeyData != nil {
+				sshPublicKey = *keys[0].KeyData
+			}
+		}
+	}
+
+	if err := s.ClearOsProfile(); err != nil {
+		return err
+	}
+
+	if sshPublicKey != "" && adminUsername != "" {
+		vmAccessExtension := &Resource{
+			ApiVersion: common.StringPtr("[variables('computeApiVersion')]"),
+			Type:       common.StringPtr("Microsoft.Compute/virtualMachines/extensions"),
+			Name:       common.StringPtr("[concat(parameters('vmName'), '/VMAccessForLinux')]"),
+			Location:   common.StringPtr("[variables('location')]"),
+			Properties: &Properties{
+				Publisher:               common.StringPtr("Microsoft.OSTCExtensions"),
+				Type:                    common.StringPtr("VMAccessForLinux"),
+				TypeHandlerVersion:      common.StringPtr("1.5"),
+				AutoUpgradeMinorVersion: common.BoolPtr(true),
+				ProtectedSettings: map[string]interface{}{
+					"username": adminUsername,
+					"ssh_key":  sshPublicKey,
+				},
+			},
+			DependsOn: &[]string{
+				"[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
+			},
+		}
+
+		s.template.Resources = append(s.template.Resources, vmAccessExtension)
+	}
+
+	return nil
+}
+
 func (s *TemplateBuilder) SetDiskEncryptionSetID(diskEncryptionSetID string, securityType *hashiVMSDK.SecurityTypes, securityEncryptionType *hashiVMSDK.SecurityEncryptionTypes) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
@@ -837,6 +946,7 @@ const BasicTemplate = `{
   "variables": {
     "addressPrefix": "10.0.0.0/16",
     "computeApiVersion": "2023-03-01",
+    "diskApiVersion": "2023-04-02",
     "location": "[resourceGroup().location]",
     "networkApiVersion": "2023-04-01",
     "publicIPAddressType": "Dynamic",

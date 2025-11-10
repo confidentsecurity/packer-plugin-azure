@@ -56,17 +56,28 @@
         },
         "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
       },
-      "sku": {
-        "name": "Standard",
-        "tier": "Regional"
-      },
-      "tags": {
-        "PlanInfo": "planName00",
-        "PlanProduct": "planProduct00",
-        "PlanPromotionCode": "",
-        "PlanPublisher": "planPublisher00"
-      },
       "type": "Microsoft.Network/publicIPAddresses"
+    },
+    {
+      "apiVersion": "[variables('networkApiVersion')]",
+      "location": "[variables('location')]",
+      "name": "[variables('virtualNetworkName')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetAddressPrefix')]"
+            }
+          }
+        ]
+      },
+      "type": "Microsoft.Network/virtualNetworks"
     },
     {
       "apiVersion": "[variables('networkApiVersion')]",
@@ -92,26 +103,16 @@
           }
         ]
       },
-      "tags": {
-        "PlanInfo": "planName00",
-        "PlanProduct": "planProduct00",
-        "PlanPromotionCode": "",
-        "PlanPublisher": "planPublisher00"
-      },
       "type": "Microsoft.Network/networkInterfaces"
     },
     {
       "apiVersion": "[variables('computeApiVersion')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicName'))]",
+        "[concat('Microsoft.Compute/disks/', parameters('osDiskName'))]"
       ],
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
-      "plan": {
-        "name": "planName00",
-        "product": "planProduct00",
-        "publisher": "planPublisher00"
-      },
       "properties": {
         "diagnosticsProfile": {
           "bootDiagnostics": {
@@ -128,40 +129,17 @@
             }
           ]
         },
-        "osProfile": {
-          "adminUsername": "[parameters('adminUsername')]",
-          "computerName": "[parameters('vmName')]",
-          "linuxConfiguration": {
-            "disablePasswordAuthentication": true,
-            "ssh": {
-              "publicKeys": [
-                {
-                  "keyData": "",
-                  "path": "[variables('sshKeyPath')]"
-                }
-              ]
-            }
-          }
-        },
         "storageProfile": {
-          "imageReference": {
-            "offer": "ignored00",
-            "publisher": "ignored00",
-            "sku": "ignored00",
-            "version": "latest"
-          },
           "osDisk": {
             "caching": "ReadWrite",
-            "createOption": "FromImage",
-            "name": "[parameters('osDiskName')]"
+            "createOption": "Attach",
+            "managedDisk": {
+              "id": "[resourceId('Microsoft.Compute/disks', parameters('osDiskName'))]"
+            },
+            "name": "[parameters('osDiskName')]",
+            "osType": "Linux"
           }
         }
-      },
-      "tags": {
-        "PlanInfo": "planName00",
-        "PlanProduct": "planProduct00",
-        "PlanPromotionCode": "",
-        "PlanPublisher": "planPublisher00"
       },
       "type": "Microsoft.Compute/virtualMachines"
     },
@@ -182,76 +160,45 @@
         "type": "CustomScriptExtension",
         "typeHandlerVersion": "1.10"
       },
-      "tags": {
-        "PlanInfo": "planName00",
-        "PlanProduct": "planProduct00",
-        "PlanPromotionCode": "",
-        "PlanPublisher": "planPublisher00"
-      },
       "type": "Microsoft.Compute/virtualMachines/extensions"
     },
     {
-      "apiVersion": "[variables('networkApiVersion')]",
+      "apiVersion": "[variables('diskApiVersion')]",
       "location": "[variables('location')]",
-      "name": "[parameters('nsgName')]",
+      "name": "[parameters('osDiskName')]",
       "properties": {
-        "securityRules": [
-          {
-            "name": "AllowIPsToSshWinRMInbound",
-            "properties": {
-              "access": "Allow",
-              "description": "Allow inbound traffic from specified IP addresses",
-              "destinationAddressPrefix": "VirtualNetwork",
-              "destinationPortRange": "0",
-              "direction": "Inbound",
-              "priority": 100,
-              "protocol": "Tcp",
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*"
-            }
+        "creationData": {
+          "createOption": "FromImage",
+          "galleryImageReference": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Compute/galleries/testgallery/images/testimage/versions/1.0.0"
           }
-        ]
+        },
+        "tier": "P30"
       },
-      "tags": {
-        "PlanInfo": "planName00",
-        "PlanProduct": "planProduct00",
-        "PlanPromotionCode": "",
-        "PlanPublisher": "planPublisher00"
+      "sku": {
+        "name": "Premium_LRS",
+        "tier": "Premium"
       },
-      "type": "Microsoft.Network/networkSecurityGroups"
+      "type": "Microsoft.Compute/disks"
     },
     {
-      "apiVersion": "[variables('networkApiVersion')]",
+      "apiVersion": "[variables('computeApiVersion')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkSecurityGroups/', parameters('nsgName'))]"
+        "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
       ],
       "location": "[variables('location')]",
-      "name": "[variables('virtualNetworkName')]",
+      "name": "[concat(parameters('vmName'), '/VMAccessForLinux')]",
       "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
+        "autoUpgradeMinorVersion": true,
+        "protectedSettings": {
+          "ssh_key": "--test-ssh-authorized-key--",
+          "username": "[parameters('adminUsername')]"
         },
-        "subnets": [
-          {
-            "name": "[variables('subnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('subnetAddressPrefix')]",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
-              }
-            }
-          }
-        ]
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "VMAccessForLinux",
+        "typeHandlerVersion": "1.5"
       },
-      "tags": {
-        "PlanInfo": "planName00",
-        "PlanProduct": "planProduct00",
-        "PlanPromotionCode": "",
-        "PlanPublisher": "planPublisher00"
-      },
-      "type": "Microsoft.Network/virtualNetworks"
+      "type": "Microsoft.Compute/virtualMachines/extensions"
     }
   ],
   "variables": {
@@ -260,7 +207,7 @@
     "diskApiVersion": "2023-04-02",
     "location": "[resourceGroup().location]",
     "networkApiVersion": "2023-04-01",
-    "publicIPAddressType": "Static",
+    "publicIPAddressType": "Dynamic",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
     "subnetAddressPrefix": "10.0.0.0/24",
     "subnetName": "[parameters('subnetName')]",

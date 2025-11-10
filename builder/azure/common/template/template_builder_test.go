@@ -466,3 +466,31 @@ func TestLicenseType01(t *testing.T) {
 
 	approvaltests.VerifyJSONBytes(t, []byte(*doc))
 }
+
+// Test SetOSDiskPerformanceTier sets the tier in the template
+func TestSetOSDiskPerformanceTier(t *testing.T) {
+	testSubject, err := NewTemplateBuilder(BasicTemplate)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err = testSubject.BuildLinux("--test-ssh-authorized-key--", true); err != nil {
+		t.Fatal(err)
+	}
+
+	imageID := "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Compute/galleries/testgallery/images/testimage/versions/1.0.0"
+	if err = testSubject.SetSharedGalleryImage("westcentralus", imageID, compute.CachingTypesReadWrite); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = testSubject.SetOSDiskPerformanceTier("P30"); err != nil {
+		t.Fatal(err)
+	}
+
+	doc, err := testSubject.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	approvaltests.VerifyJSONBytes(t, []byte(*doc))
+}
